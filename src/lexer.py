@@ -1,27 +1,31 @@
 from enum import Enum
 from typing import List, Dict
 
-from src.match import *
+from match import *
 
 class TokenType(Enum) :
     Number = 0
     Identifier = 1
-    Equals = 2
+    
     OpenParam = 3
     CloseParam = 4
+    
+    Equals = 2
     BinaryOperator = 5
+    
     Let = 6
+    EOF = 7
+
+KEYWORDS : Dict[str, TokenType] = {
+    "let" : TokenType.Let
+}
 
 class Token() :
     def __init__(self, value : str, type: TokenType) -> None:
         self.value = value
         self.type = type
 
-KEYWORDS : Dict[str, TokenType] = {
-    "let" : TokenType.Let
-}
-
-def tokenize(source) :
+def tokenize(source) -> List[Token] :
 
     tokens: List[Token] = []
     src : str = source
@@ -78,9 +82,10 @@ def tokenize(source) :
                 print("Unrecognised character found in source : ", src[ptr])
                 exit(0)
     
+    tokens.append(Token("EOF", TokenType.EOF))
     return tokens
 
-def print_tokens(tokens : List[Token]) :
+def print_tokens(tokens : List[Token]) -> None :
 
     for (i, token) in enumerate(tokens) :
         print(f'{i} : ({token.type}, {token.value})')
