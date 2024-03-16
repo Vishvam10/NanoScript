@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Dict
 
-from match import *
+from utils.match import isint, isalpha, isskippable
 
 class TokenType(Enum) :
     Number = 0
@@ -43,7 +43,7 @@ def tokenize(source) -> List[Token] :
             tokens.append(token)
             ptr += 1
         
-        elif(src[ptr] in '+-*/') :
+        elif(src[ptr] in '+-*/%') :
             token = Token(src[ptr], TokenType.BinaryOperator)
             tokens.append(token)
             ptr += 1
