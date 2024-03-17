@@ -1,6 +1,6 @@
 from typing import List
 
-from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral
+from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, VariableDecl
 from .lexer import TokenType, Token, tokenize
 
 '''
@@ -42,7 +42,54 @@ class Parser():
         return prev
 
     def _parse_stmt(self) -> Stmt:
-        return self._parse_expr()
+
+        token_type = self._at().type
+
+        if(token_type == TokenType.Let or token_type == TokenType.Const) :
+            return self._parse_variable_decl()
+        else :
+            return self._parse_expr()
+
+    def _parse_variable_decl(self) :
+        # 1. let ident;
+        # 2. (let | const) ident = Expr;
+
+        is_constant = self._eat().type == TokenType.Const
+        identifier = self._expect(
+            TokenType.Identifier, 'Expected identifier name following let or const keywords'
+        ).value
+
+        token_type = self._at().type
+
+        if(token_type == TokenType.SemiColon) :
+            self._eat()  # expect semi-colon
+            if(is_constant) :
+                print('[PARSER ERROR] : Must assign value to constant expressions. No value provided')
+                exit(0)
+            
+            return VariableDecl(
+                identifier=identifier,
+                value=None,
+                constant=False  # is_constant is false here anyway
+            )
+        
+        self._expect(
+            TokenType.Equals, 
+            'Expected equals token following identifier in variable declaration '
+        )
+
+        value = self._parse_expr()
+
+        self._expect(
+            TokenType.SemiColon, 
+            'Variable declaration statements must end with semi-colon'
+        )
+
+        return VariableDecl(
+            identifier=identifier,
+            value=value,
+            constant=is_constant
+        )
 
     def _parse_expr(self) -> Expr:
         return self._parse_additive_expr()

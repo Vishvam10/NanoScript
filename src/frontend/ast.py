@@ -1,12 +1,17 @@
 import json
 from typing import List
 from enum import Enum, auto
-from abc import ABC
+from abc import ABC, ABCMeta
 
 
 class NodeType(Enum):
+
+    # Statements
     Stmt = "Statement"
     Program = "Program"
+    VariableDecl = "VariableDecl"
+
+    # Expressions
     Expr = "Expr"
     BinaryExpr = "BinaryExpr"
     Identifier = "Identifier"
@@ -20,9 +25,6 @@ class Stmt(ABC):
     def to_dict(self):
         return {'kind': self.kind.value}
 
-    def __repr__(self) -> str:
-        return json.dumps(self.to_dict(), indent=8)
-
 
 class Program(Stmt):
     def __init__(self):
@@ -33,8 +35,15 @@ class Program(Stmt):
         return {'kind': self.kind.value, 'body': [stmt.to_dict() for stmt in self.body]}
 
 
-    def __repr__(self) -> str:
-        return json.dumps(self.to_dict(), indent=8)
+class VariableDecl(Stmt):
+    def __init__(self, identifier: str, value: 'Expr', constant: bool) -> None:
+        super().__init__(NodeType.VariableDecl)
+        self.identifier = identifier
+        self.value = value 
+        self.constant = constant
+
+    def to_dict(self):
+        return {'kind': self.kind.value, 'indentifier': self.identifier, 'value': self.value, 'constant': self.constant}
 
 
 class Expr(Stmt):
@@ -53,10 +62,6 @@ class BinaryExpr(Expr):
         return {'kind': self.kind.value, 'left': self.left.to_dict(), 'right': self.right.to_dict(), 'operator': self.operator}
 
 
-    def __repr__(self) -> str:
-        return json.dumps(self.to_dict(), indent=8)
-
-
 class NumericLiteral(Expr):
     def __init__(self, value: float):
         super().__init__(NodeType.NumericalLiteral)
@@ -65,11 +70,6 @@ class NumericLiteral(Expr):
     def to_dict(self):
         return {'kind': self.kind.value, 'value': self.value}
 
-
-    def __repr__(self) -> str:
-        return json.dumps(self.to_dict(), indent=8)
-
-
 class Identifier(Expr):
     def __init__(self, symbol: str):
         super().__init__(NodeType.Identifier)
@@ -77,7 +77,3 @@ class Identifier(Expr):
 
     def to_dict(self):
         return {'kind': self.kind.value, 'symbol': self.symbol}
-
-
-    def __repr__(self) -> str:
-        return json.dumps(self.to_dict(), indent=8)

@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Set
 
 from runtime.values import RuntimeVal
 
@@ -10,18 +10,30 @@ class Environment() :
         self.variables : Dict[
             str, RuntimeVal
         ] = {}
+        self.constants : Set[str] = set()
     
-    def decl_var(self, var_name : str, value : RuntimeVal) -> None :
-        
+    def decl_var(self, var_name : str, value : RuntimeVal, constant : bool) -> RuntimeVal :
+
         if(var_name in self.variables) :
             raise f'Cannot declare variable {var_name} as it already exists'
 
-        self.variables[var_name] = value
+        if(constant) :
+            self.constants.add(var_name)
 
-    def assign_var(self, var_name : str, value : RuntimeVal) -> None :
+        self.variables[var_name] = value
+        return value
+
+    def assign_var(self, var_name : str, value : RuntimeVal) -> RuntimeVal :
 
         env : Environment = self.resolve(var_name)
+
+        if(var_name in env.constants) :
+            raise f'Cannot re-assign to {var_name} as it is a constant'
+
+
         env.variables[var_name] = value
+
+        return value
 
     def lookup_var(self, var_name : str) -> RuntimeVal :
         

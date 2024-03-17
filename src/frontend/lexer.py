@@ -11,13 +11,17 @@ class TokenType(Enum) :
     CloseParam = auto()
     
     Equals = auto()
+    SemiColon = auto()
     BinaryOperator = auto()
     
     Let = auto()
+    Const = auto()
+
     EOF = auto()
 
 KEYWORDS : Dict[str, TokenType] = {
     "let" : TokenType.Let,
+    "const" : TokenType.Const
 }
 
 class Token() :
@@ -30,7 +34,6 @@ def tokenize(source) -> List[Token] :
     tokens: List[Token] = []
     src : str = source
     ptr : int = 0
-    print('src : ', src)
 
     while(ptr < len(src)) :
         if(src[ptr] == '(') :
@@ -52,6 +55,12 @@ def tokenize(source) -> List[Token] :
             token = Token(src[ptr], TokenType.Equals)
             tokens.append(token)
             ptr += 1
+
+        elif(src[ptr] == ';') :
+            token = Token(src[ptr], TokenType.SemiColon)
+            tokens.append(token)
+            ptr += 1
+
 
         else :
             # handle mutli-character token (eg. number, let, etc)

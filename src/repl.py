@@ -1,6 +1,6 @@
 import json
-from frontend.parser import Parser
-from runtime.values import NumberVal, make_null, make_number, make_bool
+from frontend.parser import Parser, Program
+from runtime.values import RuntimeVal, make_null, make_number, make_bool
 from runtime.interpreter import evaluate
 from runtime.environment import Environment
 
@@ -16,16 +16,15 @@ def repl() :
         
         parser = Parser()
         env = Environment()
-        env.decl_var("x", make_number(100))
-        env.decl_var("true", make_bool(True))
-        env.decl_var("false", make_bool(False))
-        env.decl_var("null", make_null())
+        env.decl_var("x", make_number(100), False)
+        env.decl_var("true", make_bool(True), False)
+        env.decl_var("false", make_bool(False), False)
+        env.decl_var("null", make_null(), False)
 
-        program = parser.generate_ast(inp)
-        
+        program : Program = parser.generate_ast(inp)
         print(program.body)
-
-        result = evaluate(program, env)
+        
+        result : RuntimeVal = evaluate(program, env)
         print(result.__dict__)
 
 if __name__ == "__main__" :
