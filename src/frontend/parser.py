@@ -1,6 +1,6 @@
 from typing import List
 
-from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, NullLiteral
+from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral
 from .lexer import TokenType, Token, tokenize
 
 '''
@@ -86,10 +86,6 @@ class Parser():
         token_type = self._at().type
         if (token_type == TokenType.Identifier):
             return Identifier(symbol=self._eat().value)
-
-        elif (token_type == TokenType.Null):
-            self._eat()
-            return NullLiteral()
 
         elif (token_type == TokenType.Number):
             return NumericLiteral(

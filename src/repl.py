@@ -1,7 +1,8 @@
 import json
 from frontend.parser import Parser
-from runtime.values import NumberVal
+from runtime.values import NumberVal, make_null, make_number, make_bool
 from runtime.interpreter import evaluate
+from runtime.environment import Environment
 
 def repl() :
 
@@ -14,11 +15,17 @@ def repl() :
             exit(0)
         
         parser = Parser()
+        env = Environment()
+        env.decl_var("x", make_number(100))
+        env.decl_var("true", make_bool(True))
+        env.decl_var("false", make_bool(False))
+        env.decl_var("null", make_null())
+
         program = parser.generate_ast(inp)
         
         print(program.body)
 
-        result = evaluate(program)
+        result = evaluate(program, env)
         print(result.__dict__)
 
 if __name__ == "__main__" :

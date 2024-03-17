@@ -11,7 +11,6 @@ class NodeType(Enum):
     BinaryExpr = "BinaryExpr"
     Identifier = "Identifier"
     NumericalLiteral = "NumericLiteral"
-    NullLiteral = "NullLiteral"
 
 
 class Stmt(ABC):
@@ -79,18 +78,6 @@ class Identifier(Expr):
     def to_dict(self):
         return {'kind': self.kind.value, 'symbol': self.symbol}
 
-
-    def __repr__(self) -> str:
-        return json.dumps(self.to_dict(), indent=8)
-
-
-class NullLiteral(Expr) :
-    def __init__(self):
-        super().__init__(NodeType.NumericalLiteral)
-        self.value = "null"
-
-    def to_dict(self):
-        return {'kind': self.kind.value, 'symbol': self.symbol}
 
     def __repr__(self) -> str:
         return json.dumps(self.to_dict(), indent=8)

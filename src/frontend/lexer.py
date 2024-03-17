@@ -1,25 +1,23 @@
-from enum import Enum
+from enum import Enum, auto
 from typing import List, Dict
 
 from utils.match import isint, isalpha, isskippable
 
 class TokenType(Enum) :
-    Number = 0
-    Identifier = 1
+    Number = auto()
+    Identifier = auto()
     
-    OpenParam = 3
-    CloseParam = 4
+    OpenParam = auto()
+    CloseParam = auto()
     
-    Equals = 2
-    BinaryOperator = 5
-    Null = 6
+    Equals = auto()
+    BinaryOperator = auto()
     
-    Let = 7
-    EOF = 8
+    Let = auto()
+    EOF = auto()
 
 KEYWORDS : Dict[str, TokenType] = {
     "let" : TokenType.Let,
-    "null" : TokenType.Null
 }
 
 class Token() :
