@@ -12,12 +12,14 @@ class TokenType(Enum) :
     
     Equals = 2
     BinaryOperator = 5
+    Null = 6
     
-    Let = 6
-    EOF = 7
+    Let = 7
+    EOF = 8
 
 KEYWORDS : Dict[str, TokenType] = {
-    "let" : TokenType.Let
+    "let" : TokenType.Let,
+    "null" : TokenType.Null
 }
 
 class Token() :

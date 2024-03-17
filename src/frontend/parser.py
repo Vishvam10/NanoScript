@@ -1,6 +1,6 @@
 from typing import List
 
-from .ast import NodeType, Stmt, Program, Expr, BinaryExp, Identifier, NumericLiteral
+from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, NullLiteral
 from .lexer import TokenType, Token, tokenize
 
 '''
@@ -13,7 +13,6 @@ from .lexer import TokenType, Token, tokenize
     so, additive calls multiplicative. multiplicative calls primary
         
 '''
-
 
 class Parser():
 
@@ -35,7 +34,8 @@ class Parser():
     def _expect(self, type: TokenType, err: str):
         prev = self._at()
         if (not prev or prev.type != type):
-            print('[PARSER ERROR] : \n', err, prev.value, ' - Expecting : ', type)
+            print('[PARSER ERROR] : \n', err,
+                  prev.value, ' - Expecting : ', type)
             exit(0)
 
         self._ptr += 1
@@ -56,7 +56,7 @@ class Parser():
             right = self._parse_multiplicative_expr()
 
             # bubbling it up instead
-            left = BinaryExp(
+            left = BinaryExpr(
                 left=left,
                 right=right,
                 operator=operator
@@ -73,7 +73,7 @@ class Parser():
             right = self._parse_primary_expr()
 
             # bubbling it up instead
-            left = BinaryExp(
+            left = BinaryExpr(
                 left=left,
                 right=right,
                 operator=operator
@@ -87,18 +87,22 @@ class Parser():
         if (token_type == TokenType.Identifier):
             return Identifier(symbol=self._eat().value)
 
+        elif (token_type == TokenType.Null):
+            self._eat()
+            return NullLiteral()
+
         elif (token_type == TokenType.Number):
             return NumericLiteral(
                 value=float(self._eat().value)
             )
 
         elif (token_type == TokenType.OpenParam):
-            
+
             # open param
             self._eat()
 
             value = self._parse_expr()
-            
+
             # close param, hopefully
             self._expect(
                 TokenType.CloseParam, 'Unexpected token found inside parenthesized expression')

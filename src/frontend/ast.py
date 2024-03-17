@@ -11,6 +11,7 @@ class NodeType(Enum):
     BinaryExpr = "BinaryExpr"
     Identifier = "Identifier"
     NumericalLiteral = "NumericLiteral"
+    NullLiteral = "NullLiteral"
 
 
 class Stmt(ABC):
@@ -33,12 +34,16 @@ class Program(Stmt):
         return {'kind': self.kind.value, 'body': [stmt.to_dict() for stmt in self.body]}
 
 
+    def __repr__(self) -> str:
+        return json.dumps(self.to_dict(), indent=8)
+
+
 class Expr(Stmt):
     def __init__(self, kind: NodeType):
         super().__init__(kind)
 
 
-class BinaryExp(Expr):
+class BinaryExpr(Expr):
     def __init__(self, left: Expr, right: Expr, operator: str):
         super().__init__(NodeType.BinaryExpr)
         self.left = left
@@ -47,6 +52,10 @@ class BinaryExp(Expr):
 
     def to_dict(self):
         return {'kind': self.kind.value, 'left': self.left.to_dict(), 'right': self.right.to_dict(), 'operator': self.operator}
+
+
+    def __repr__(self) -> str:
+        return json.dumps(self.to_dict(), indent=8)
 
 
 class NumericLiteral(Expr):
@@ -58,6 +67,10 @@ class NumericLiteral(Expr):
         return {'kind': self.kind.value, 'value': self.value}
 
 
+    def __repr__(self) -> str:
+        return json.dumps(self.to_dict(), indent=8)
+
+
 class Identifier(Expr):
     def __init__(self, symbol: str):
         super().__init__(NodeType.Identifier)
@@ -65,3 +78,19 @@ class Identifier(Expr):
 
     def to_dict(self):
         return {'kind': self.kind.value, 'symbol': self.symbol}
+
+
+    def __repr__(self) -> str:
+        return json.dumps(self.to_dict(), indent=8)
+
+
+class NullLiteral(Expr) :
+    def __init__(self):
+        super().__init__(NodeType.NumericalLiteral)
+        self.value = "null"
+
+    def to_dict(self):
+        return {'kind': self.kind.value, 'symbol': self.symbol}
+
+    def __repr__(self) -> str:
+        return json.dumps(self.to_dict(), indent=8)
