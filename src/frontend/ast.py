@@ -14,6 +14,7 @@ class NodeType(Enum):
     # Expressions
     Expr = "Expr"
     BinaryExpr = "BinaryExpr"
+    AssignmentExpr = "AssignmentExpr"
     Identifier = "Identifier"
     NumericalLiteral = "NumericLiteral"
 
@@ -60,6 +61,18 @@ class BinaryExpr(Expr):
 
     def to_dict(self):
         return {'kind': self.kind.value, 'left': self.left.to_dict(), 'right': self.right.to_dict(), 'operator': self.operator}
+
+class AssignmentExpr(Expr):
+    def __init__(self, assignee : Expr, value : Expr):
+        super().__init__(NodeType.AssignmentExpr)
+
+        # assignee is not an Identifier because things like obj.property are not a valid Identifier. It is a different type of Expr which is much more complex to handle
+        self.assignee = assignee
+        self.value = value
+
+
+    def to_dict(self):
+        return {'kind': self.kind.value, 'assignee': self.assignee.to_dict(), 'value': self.value.to_dict()}
 
 
 class NumericLiteral(Expr):

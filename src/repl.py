@@ -16,10 +16,9 @@ def repl() :
         
         parser = Parser()
         env = Environment()
-        env.decl_var("x", make_number(100), False)
-        env.decl_var("true", make_bool(True), False)
-        env.decl_var("false", make_bool(False), False)
-        env.decl_var("null", make_null(), False)
+        env.decl_var("true", make_bool(True), True)
+        env.decl_var("false", make_bool(False), True)
+        env.decl_var("null", make_null(), True)
 
         program : Program = parser.generate_ast(inp)
         print(program.body)

@@ -1,13 +1,16 @@
 from typing import List
 
-from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, VariableDecl
+from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, VariableDecl, AssignmentExpr
 from .lexer import TokenType, Token, tokenize
 
 '''
-    order of precedence :
-        AdditiveExpr
-        MultiplicativeExpr
-        PrimaryExpr (highest)
+    order of precedence : 
+    lower in the tree or the call stack has the highest precedence
+
+    |    AssignmentExpr
+    |    AdditiveExpr
+    |    MultiplicativeExpr
+    v    PrimaryExpr (highest)
 
     more precedence = further down the tree
     so, additive calls multiplicative. multiplicative calls primary
@@ -50,7 +53,7 @@ class Parser():
         else :
             return self._parse_expr()
 
-    def _parse_variable_decl(self) :
+    def _parse_variable_decl(self) -> Stmt :
         # 1. let ident;
         # 2. (let | const) ident = Expr;
 
@@ -91,8 +94,29 @@ class Parser():
             constant=is_constant
         )
 
+    def _parse_assignment_expr(self) : 
+        assignee : Expr = self._parse_additive_expr()
+        
+        token_type : TokenType = self._at().type
+        print()
+        print("\nASSIGNEE : ", assignee.to_dict)
+        print("\nTOKEN TYPE : ", token_type)
+        print()
+
+        if(token_type == TokenType.Equals) :
+            print("\nREACHED : ", assignee.to_dict())
+            self._eat()
+            value = self._parse_assignment_expr
+            return AssignmentExpr(
+                assignee=assignee,
+                value=value
+            )
+        
+        return assignee
+
     def _parse_expr(self) -> Expr:
-        return self._parse_additive_expr()
+        return self._parse_assignment_expr()
+
 
     def _parse_additive_expr(self) -> Expr:
         # left hand precedence : parse the left expr first
