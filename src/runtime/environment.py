@@ -2,7 +2,8 @@ from typing import Dict, Set
 
 from runtime.values import RuntimeVal
 
-# this is the 'scope' 
+# This is the 'scope'. 
+
 class Environment() :
 
     def __init__(self) -> None:
@@ -15,12 +16,14 @@ class Environment() :
     def decl_var(self, var_name : str, value : RuntimeVal, constant : bool) -> RuntimeVal :
 
         if(var_name in self.variables) :
-            raise f'Cannot declare variable {var_name} as it already exists'
+            print(f'Cannot declare variable {var_name} as it already exists')
+            exit(0)
 
         if(constant) :
             self.constants.add(var_name)
 
         self.variables[var_name] = value
+
         return value
 
     def assign_var(self, var_name : str, value : RuntimeVal) -> RuntimeVal :
@@ -28,8 +31,8 @@ class Environment() :
         env : Environment = self.resolve(var_name)
 
         if(var_name in env.constants) :
-            raise f'Cannot re-assign to {var_name} as it is a constant'
-
+            print(f'Cannot re-assign to {var_name} as it is a constant')
+            exit(0)
 
         env.variables[var_name] = value
 
@@ -41,13 +44,13 @@ class Environment() :
         return env.variables[var_name]
 
     def resolve(self, var_name : str) -> 'Environment' :
-        
         if(var_name in self.variables) :
             return self
         
         if(self.parent == None) :
-            raise f'Cannot resolve {var_name} as it does not exist'
-    
+            print(f'Cannot resolve {var_name} as it does not exist')
+            exit(0)
+
         return self.parent.resolve(var_name)
 
 
