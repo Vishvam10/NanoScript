@@ -1,3 +1,4 @@
+import inspect
 from typing import List
 
 from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, VariableDecl, AssignmentExpr
@@ -37,8 +38,7 @@ class Parser():
     def _expect(self, type: TokenType, err: str):
         prev = self._at()
         if (not prev or prev.type != type):
-            print('[PARSER ERROR] : \n', err,
-                  prev.value, ' - Expecting : ', type)
+            print(f'\n[PARSER ERROR] : \n {err}, \n Expected : {type}, \nRecieved :  {prev.value}')
             exit(0)
 
         self._ptr += 1
@@ -67,7 +67,7 @@ class Parser():
         if(token_type == TokenType.SemiColon) :
             self._eat()  # expect semi-colon
             if(is_constant) :
-                print('[PARSER ERROR] : Must assign value to constant expressions. No value provided')
+                print('\n[PARSER ERROR] : Must assign value to constant expressions. No value provided')
                 exit(0)
             
             return VariableDecl(
@@ -82,7 +82,6 @@ class Parser():
         )
 
         value = self._parse_expr()
-
         self._expect(
             TokenType.SemiColon, 
             'Variable declaration statements must end with semi-colon'
@@ -98,15 +97,13 @@ class Parser():
         assignee : Expr = self._parse_additive_expr()
         
         token_type : TokenType = self._at().type
-        print()
-        print("\nASSIGNEE : ", assignee.to_dict)
-        print("\nTOKEN TYPE : ", token_type)
-        print()
 
         if(token_type == TokenType.Equals) :
-            print("\nREACHED : ", assignee.to_dict())
             self._eat()
-            value = self._parse_assignment_expr
+
+            # we do this to allow chaining like a = b = c
+            value = self._parse_assignment_expr()
+           
             return AssignmentExpr(
                 assignee=assignee,
                 value=value
@@ -116,7 +113,6 @@ class Parser():
 
     def _parse_expr(self) -> Expr:
         return self._parse_assignment_expr()
-
 
     def _parse_additive_expr(self) -> Expr:
         # left hand precedence : parse the left expr first
