@@ -57,7 +57,6 @@ class Interpreter() :
 
     def _evaluate_assignment(self, node : AssignmentExpr) :
 
-        print('kind : ', node.assignee.kind)
         if(node.assignee.kind != NodeType.Identifier) :
             print(f'\n[INTERPRETER ERROR] : Invalid LHS inside assignmenr expr : {node.assignee.to_dict()}')
             exit(0)
@@ -66,8 +65,6 @@ class Interpreter() :
         value = self.evaluate(node.value)
        
         return self.env.assign_var(var_name, value)
-
-
 
     def _evaluate_program(self, program: Program) -> RuntimeVal:
 
