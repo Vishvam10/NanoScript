@@ -7,11 +7,21 @@ class TokenType(Enum) :
     Number = auto()
     Identifier = auto()
     
+
+    # ( and )
     OpenParam = auto()
     CloseParam = auto()
+
+    # { and }
+    OpenBrace = auto()
+    CloseBrace = auto()
     
     Equals = auto()
+
+    Colon = auto()
+    Comma = auto()
     SemiColon = auto()
+
     BinaryOperator = auto()
     
     Let = auto()
@@ -43,6 +53,26 @@ def tokenize(source) -> List[Token] :
 
         elif(src[ptr] == ')') :
             token = Token(src[ptr], TokenType.CloseParam)
+            tokens.append(token)
+            ptr += 1
+        
+        elif(src[ptr] == '{') :
+            token = Token(src[ptr], TokenType.OpenBrace)
+            tokens.append(token)
+            ptr += 1
+
+        elif(src[ptr] == '}') :
+            token = Token(src[ptr], TokenType.CloseBrace)
+            tokens.append(token)
+            ptr += 1
+        
+        elif(src[ptr] == ':') :
+            token = Token(src[ptr], TokenType.Colon)
+            tokens.append(token)
+            ptr += 1
+        
+        elif(src[ptr] == ',') :
+            token = Token(src[ptr], TokenType.Comma)
             tokens.append(token)
             ptr += 1
         

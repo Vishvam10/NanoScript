@@ -1,19 +1,14 @@
 from frontend.parser import Parser, Program
-from runtime.values import RuntimeVal, make_null, make_number, make_bool
+from runtime.values import RuntimeVal
 from runtime.interpreter import Interpreter
-from runtime.environment import Environment
+from runtime.environment import create_global_env
 
 def repl() :
 
     print("\nNanoScript v0.1\n")
 
     # global env since we want to persist the env across the entire repl session
-    env = Environment()
-    
-    # few global keywords (kinda hacky to set it this way since it bypasses the lexer and the parser)
-    env.decl_var("true", make_bool(True), True)
-    env.decl_var("false", make_bool (False), True)
-    env.decl_var("null", make_null(), True)
+    env = create_global_env()
     
     while(True) :
         inp = input(">> ").strip()
@@ -28,9 +23,33 @@ def repl() :
         result : RuntimeVal = interpreter.evaluate(program)
         print(result.__dict__)
 
+def run() :
+
+    print("\nNanoScript v0.1\n")
+
+    # global env since we want to persist the env across the entire repl session
+    env = create_global_env()
+    
+    f = open('./../tests/test.txt', 'r')
+    inp = f.read()
+    f.close()
+    
+    print(inp.replace('\n', ' '))
+    print()
+
+    parser = Parser()
+
+    program : Program = parser.generate_ast(inp)
+    interpreter = Interpreter(env)
+    
+    result : RuntimeVal = interpreter.evaluate(program)
+    print(result.__dict__)
+
+
 
 if __name__ == "__main__" :
 
-    repl()
+    # repl()
+    run()
 
 

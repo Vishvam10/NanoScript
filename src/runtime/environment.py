@@ -1,12 +1,14 @@
-from typing import Dict, Set
-
+from typing import Dict, Set, Optional
 from runtime.values import RuntimeVal
+
+from .values import make_bool, make_null
 
 # This is the 'scope'. 
 
 class Environment() :
 
-    def __init__(self) -> None:
+    def __init__(self, parent : Optional['Environment'] = None) -> None:
+        self.global_scope : bool = (parent == None)
         self.parent : Environment = None
         self.variables : Dict[
             str, RuntimeVal
@@ -55,5 +57,13 @@ class Environment() :
 
 
 
+def create_global_env(env) :
 
+    env = Environment()
 
+    # few global keywords (kinda hacky to set it this way since it bypasses the lexer and the parser)
+    env.decl_var("true", make_bool(True), True)
+    env.decl_var("false", make_bool (False), True)
+    env.decl_var("null", make_null(), True)
+    
+    return env

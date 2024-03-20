@@ -1,7 +1,7 @@
 from typing import cast
 
-from .values import RuntimeVal, NumberVal, make_null, make_number
-from frontend.ast import NodeType, Stmt, Identifier, VariableDecl, AssignmentExpr, BinaryExpr, Program
+from .values import *
+from frontend.ast import *
 from runtime.environment import Environment
 
 class Interpreter() :
@@ -46,6 +46,21 @@ class Interpreter() :
         val = self.env.lookup_var(ident.symbol)
         return val
 
+    def _evaluate_object_expr(self, obj : ObjectLiteral) -> RuntimeVal :
+        
+        res = ObjectVal({})
+
+        for prop in obj.properties :
+            
+            if(not prop.value) :
+                self.env.lookup_var(prop.key)
+            else :
+                self.evaluate(prop.value)
+
+        res.properties[prop.key] = RuntimeVal
+
+        return res
+
     def _evaluate_variable_decl(self, decl: VariableDecl) -> RuntimeVal:
 
         val = make_null()
@@ -75,7 +90,6 @@ class Interpreter() :
 
         return last_evaluated
 
-
     def evaluate(self, ast_node: Stmt) -> RuntimeVal:
 
         print(ast_node, type(ast_node))
@@ -95,6 +109,9 @@ class Interpreter() :
 
         elif (ast_node.kind == NodeType.Identifier):
             return self._evaluate_identifier(ast_node)
+        
+        elif (ast_node.kind == NodeType.ObjectLiteral):
+            return self._evaluate_object_expr(ast_node)
 
         elif (ast_node.kind == NodeType.VariableDecl):
             return self._evaluate_variable_decl(ast_node)

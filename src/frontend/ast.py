@@ -1,8 +1,6 @@
-import json
-from typing import List
-from enum import Enum, auto
-from abc import ABC, ABCMeta
-
+from typing import List, Optional
+from enum import Enum
+from abc import ABC
 
 class NodeType(Enum):
 
@@ -12,12 +10,19 @@ class NodeType(Enum):
     VariableDecl = "VariableDecl"
 
     # Expressions
-    Expr = "Expr"
-    BinaryExpr = "BinaryExpr"
     AssignmentExpr = "AssignmentExpr"
+    BinaryExpr = "BinaryExpr"
+
+    # Literals
     Identifier = "Identifier"
     NumericalLiteral = "NumericLiteral"
+    PropertyLiteral = "PropertyLiteral"
+    ObjectLiteral = "Object" 
 
+
+# ------------------------------------------------------------------------------
+# Statements 
+# ------------------------------------------------------------------------------
 
 class Stmt(ABC):
     def __init__(self, kind: NodeType):
@@ -26,7 +31,6 @@ class Stmt(ABC):
     def to_dict(self):
         return {'kind': self.kind.value}
 
-
 class Program(Stmt):
     def __init__(self):
         super().__init__(NodeType.Program)
@@ -34,7 +38,6 @@ class Program(Stmt):
 
     def to_dict(self):
         return {'kind': self.kind.value, 'body': [stmt.to_dict() for stmt in self.body]}
-
 
 class VariableDecl(Stmt):
     def __init__(self, identifier: str, value: 'Expr', constant: bool) -> None:
@@ -46,11 +49,13 @@ class VariableDecl(Stmt):
     def to_dict(self):
         return {'kind': self.kind.value, 'indentifier': self.identifier, 'value': self.value, 'constant': self.constant}
 
+# ------------------------------------------------------------------------------
+# Expressions 
+# ------------------------------------------------------------------------------
 
 class Expr(Stmt):
     def __init__(self, kind: NodeType):
         super().__init__(kind)
-
 
 class BinaryExpr(Expr):
     def __init__(self, left: Expr, right: Expr, operator: str):
@@ -74,6 +79,19 @@ class AssignmentExpr(Expr):
     def to_dict(self):
         return {'kind': self.kind.value, 'assignee': self.assignee.to_dict(), 'value': self.value.to_dict()}
 
+class Identifier(Expr):
+    def __init__(self, symbol: str):
+        super().__init__(NodeType.Identifier)
+        self.symbol = symbol
+
+    def to_dict(self):
+        return {'kind': self.kind.value, 'symbol': self.symbol}
+
+
+# ------------------------------------------------------------------------------
+# Literals 
+# ------------------------------------------------------------------------------
+
 
 class NumericLiteral(Expr):
     def __init__(self, value: float):
@@ -83,10 +101,19 @@ class NumericLiteral(Expr):
     def to_dict(self):
         return {'kind': self.kind.value, 'value': self.value}
 
-class Identifier(Expr):
-    def __init__(self, symbol: str):
-        super().__init__(NodeType.Identifier)
-        self.symbol = symbol
+class PropertyLiteral(Expr):
+    def __init__(self, key : str, value : Optional[Expr] = None):
+        super().__init__(NodeType.ObjectLiteral)
+        self.key = key
+        self.value = value
 
     def to_dict(self):
-        return {'kind': self.kind.value, 'symbol': self.symbol}
+        return {'kind': self.kind.value, 'value': self.value}
+
+class ObjectLiteral(Expr):
+    def __init__(self, properties: List[PropertyLiteral]):
+        super().__init__(NodeType.ObjectLiteral)
+        self.properties : properties
+
+    def to_dict(self):
+        return {'kind': self.kind.value, 'properties': self.properties}

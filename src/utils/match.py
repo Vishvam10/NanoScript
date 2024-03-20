@@ -10,4 +10,4 @@ def isint(s) -> bool :
     return bool(re.match(MATCH_IS_INT, s))
 
 def isskippable(s) -> bool :
-    return s == "" or s == " " or s == "\n" or s == "\t"
+    return s == '' or s == ' ' or s == '\n' or s == '\t' or s == '\r'

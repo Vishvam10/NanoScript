@@ -1,7 +1,7 @@
 import inspect
 from typing import List
 
-from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, VariableDecl, AssignmentExpr
+from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, VariableDecl, AssignmentExpr, PropertyLiteral, ObjectLiteral
 from .lexer import TokenType, Token, tokenize
 
 '''
@@ -28,6 +28,7 @@ class Parser():
         return self._tokens[self._ptr].type != TokenType.EOF
 
     def _at(self) -> Token:
+        # print('**** AT : ', self._tokens[self._ptr].type, self._tokens[self._ptr].value)
         return self._tokens[self._ptr]
 
     def _eat(self) -> Token:
@@ -38,7 +39,7 @@ class Parser():
     def _expect(self, type: TokenType, err: str):
         prev = self._at()
         if (not prev or prev.type != type):
-            print(f'\n[PARSER ERROR] : \n {err}, \n Expected : {type}, \nRecieved :  {prev.value}')
+            print(f'\n[PARSER ERROR] : \n {err}, \n Expected : {type}, \nReceived : ({prev.value}, {prev.type})')
             exit(0)
 
         self._ptr += 1
@@ -94,9 +95,11 @@ class Parser():
         )
 
     def _parse_assignment_expr(self) : 
-        assignee : Expr = self._parse_additive_expr()
+        assignee : Expr = self._parse_object_expr()
         
         token_type : TokenType = self._at().type
+
+        print('IN ASSIGNMENT : ', assignee.kind, token_type, self._at().value)
 
         if(token_type == TokenType.Equals) :
             self._eat()
@@ -113,6 +116,98 @@ class Parser():
 
     def _parse_expr(self) -> Expr:
         return self._parse_assignment_expr()
+
+    def _parse_object_expr(self) -> Expr :
+
+        token_type = self._at().type
+
+        if(token_type != TokenType.OpenBrace) :
+            # not an object, so continue
+            self._parse_additive_expr()
+        
+        # advance past open brace
+        self._eat()
+        print('past : ', self._at().type, self._at().value)
+
+        properties : List[PropertyLiteral] = []
+
+        while(self._not_eof() and self._at().type != TokenType.CloseBrace) :
+
+            # we want to handle { key1 : val1, key2 : val2 } AND { key1, key2 }
+
+            print('BEFORE KEY : ', self._at().type, self._at().value)
+            
+            key = self._expect(
+                TokenType.Identifier,
+                'Object literal key expected'
+            )
+
+            token_type = self._at().type
+
+            print('AFTER KEY : ', self._at().type, self._at().value)
+
+            # allows short hand : { key1, key2 }. so, key : val -> { key }
+            if(token_type == TokenType.Comma) :
+                print('REACHED COMMNA')
+                # advance past the comma
+                self._eat() 
+
+                properties.append(
+                    PropertyLiteral(
+                        key=key
+                    )
+                )
+
+                continue
+
+            # allows short hand : { key1, key2 }. so, key : val -> { key }
+            elif(token_type == TokenType.CloseBrace) :
+                print('REACHED SHORT CLOSE')
+                properties.append(
+                    PropertyLiteral(
+                        key=key
+                    )
+                )
+ 
+                continue
+
+
+            # handling { key1 : val1, key2 : val2 } now
+            self._expect(
+                TokenType.Colon, 
+                'Missing colon following identifier in ObjectExpr'
+            )
+
+            value = self._parse_expr()
+
+            print('HERE IN VALUE : ', value)
+
+            properties.append(
+                PropertyLiteral(
+                    key=key,
+                    value=value
+                )
+            )
+
+            if(self._at().type != TokenType.CloseBrace) :
+                print('REACHED NOT CLOSE')
+                self._expect(
+                    TokenType.Comma,
+                    'Expected comma or closing bracket following property'
+                )
+
+            print(f'AT : ({self._at().type}, {self._at().value})')
+
+
+        self._expect(
+            TokenType.CloseBrace, 
+            'Object literal missing closing braces'
+        )
+        
+        return ObjectLiteral(
+            properties=properties
+        )
+
 
     def _parse_additive_expr(self) -> Expr:
         # left hand precedence : parse the left expr first
