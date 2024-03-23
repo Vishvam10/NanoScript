@@ -28,7 +28,6 @@ class Parser():
         return self._tokens[self._ptr].type != TokenType.EOF
 
     def _at(self) -> Token:
-        # print('\n**** AT : ', self._tokens[self._ptr].type, self._tokens[self._ptr].value)
         return self._tokens[self._ptr]
 
     def _eat(self) -> Token:

@@ -51,14 +51,9 @@ class Interpreter() :
         res = ObjectVal({})
 
         for prop in obj.properties :
-            
-            if(not prop.value) :
-                self.env.lookup_var(prop.key)
-            else :
-                self.evaluate(prop.value)
+            value = self.evaluate(prop.value) if (prop.value) else self.env.lookup_var(prop.key)
 
-        res.properties[prop.key] = RuntimeVal
-
+            res.properties[prop.key] = value
         return res
 
     def _evaluate_variable_decl(self, decl: VariableDecl) -> RuntimeVal:
@@ -91,8 +86,6 @@ class Interpreter() :
         return last_evaluated
 
     def evaluate(self, ast_node: Stmt) -> RuntimeVal:
-
-        print(ast_node, type(ast_node))
 
         if (ast_node == None):
             print('\n[INTERPRETER ERROR] : AST node is None : ', ast_node)
