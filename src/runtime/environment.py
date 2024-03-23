@@ -57,7 +57,7 @@ class Environment() :
 
 
 
-def create_global_env(env) :
+def create_global_env() :
 
     env = Environment()
 

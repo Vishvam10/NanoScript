@@ -103,7 +103,7 @@ class NumericLiteral(Expr):
 
 class PropertyLiteral(Expr):
     def __init__(self, key : str, value : Optional[Expr] = None):
-        super().__init__(NodeType.ObjectLiteral)
+        super().__init__(NodeType.PropertyLiteral)
         self.key = key
         self.value = value
 
@@ -113,7 +113,7 @@ class PropertyLiteral(Expr):
 class ObjectLiteral(Expr):
     def __init__(self, properties: List[PropertyLiteral]):
         super().__init__(NodeType.ObjectLiteral)
-        self.properties : properties
+        self.properties = properties
 
     def to_dict(self):
         return {'kind': self.kind.value, 'properties': self.properties}

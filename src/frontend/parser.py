@@ -28,7 +28,7 @@ class Parser():
         return self._tokens[self._ptr].type != TokenType.EOF
 
     def _at(self) -> Token:
-        # print('**** AT : ', self._tokens[self._ptr].type, self._tokens[self._ptr].value)
+        # print('\n**** AT : ', self._tokens[self._ptr].type, self._tokens[self._ptr].value)
         return self._tokens[self._ptr]
 
     def _eat(self) -> Token:
@@ -57,7 +57,6 @@ class Parser():
     def _parse_variable_decl(self) -> Stmt :
         # 1. let ident;
         # 2. (let | const) ident = Expr;
-
         is_constant = self._eat().type == TokenType.Const
         identifier = self._expect(
             TokenType.Identifier, 'Expected identifier name following let or const keywords'
@@ -68,7 +67,7 @@ class Parser():
         if(token_type == TokenType.SemiColon) :
             self._eat()  # expect semi-colon
             if(is_constant) :
-                print('\n[PARSER ERROR] : Must assign value to constant expressions. No value provided')
+                print('\n\n[PARSER ERROR] : Must assign value to constant expressions. No value provided')
                 exit(0)
             
             return VariableDecl(
@@ -83,6 +82,7 @@ class Parser():
         )
 
         value = self._parse_expr()
+        
         self._expect(
             TokenType.SemiColon, 
             'Variable declaration statements must end with semi-colon'
@@ -98,9 +98,7 @@ class Parser():
         assignee : Expr = self._parse_object_expr()
         
         token_type : TokenType = self._at().type
-
-        print('IN ASSIGNMENT : ', assignee.kind, token_type, self._at().value)
-
+        
         if(token_type == TokenType.Equals) :
             self._eat()
 
@@ -123,32 +121,26 @@ class Parser():
 
         if(token_type != TokenType.OpenBrace) :
             # not an object, so continue
-            self._parse_additive_expr()
+            return self._parse_additive_expr()
         
         # advance past open brace
         self._eat()
-        print('past : ', self._at().type, self._at().value)
 
         properties : List[PropertyLiteral] = []
 
         while(self._not_eof() and self._at().type != TokenType.CloseBrace) :
 
             # we want to handle { key1 : val1, key2 : val2 } AND { key1, key2 }
-
-            print('BEFORE KEY : ', self._at().type, self._at().value)
             
             key = self._expect(
                 TokenType.Identifier,
                 'Object literal key expected'
-            )
+            ).value
 
             token_type = self._at().type
 
-            print('AFTER KEY : ', self._at().type, self._at().value)
-
             # allows short hand : { key1, key2 }. so, key : val -> { key }
             if(token_type == TokenType.Comma) :
-                print('REACHED COMMNA')
                 # advance past the comma
                 self._eat() 
 
@@ -162,7 +154,6 @@ class Parser():
 
             # allows short hand : { key1, key2 }. so, key : val -> { key }
             elif(token_type == TokenType.CloseBrace) :
-                print('REACHED SHORT CLOSE')
                 properties.append(
                     PropertyLiteral(
                         key=key
@@ -180,8 +171,6 @@ class Parser():
 
             value = self._parse_expr()
 
-            print('HERE IN VALUE : ', value)
-
             properties.append(
                 PropertyLiteral(
                     key=key,
@@ -190,14 +179,10 @@ class Parser():
             )
 
             if(self._at().type != TokenType.CloseBrace) :
-                print('REACHED NOT CLOSE')
                 self._expect(
                     TokenType.Comma,
                     'Expected comma or closing bracket following property'
                 )
-
-            print(f'AT : ({self._at().type}, {self._at().value})')
-
 
         self._expect(
             TokenType.CloseBrace, 
@@ -267,7 +252,7 @@ class Parser():
             return value
 
         else:
-            print("Unexpected token found during parsing : ",
+            print("\nUnexpected token found during parsing : ",
                   self._at().type, self._at().value)
             exit(0)
 
