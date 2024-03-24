@@ -16,11 +16,16 @@ class TokenType(Enum) :
     OpenBrace = auto()
     CloseBrace = auto()
     
+    # [ and ]
+    OpenBracket = auto()
+    CloseBracket = auto()
+    
     Equals = auto()
 
     Colon = auto()
-    Comma = auto()
     SemiColon = auto()
+    Comma = auto()
+    Dot = auto()
 
     BinaryOperator = auto()
     
@@ -66,13 +71,33 @@ def tokenize(source) -> List[Token] :
             tokens.append(token)
             ptr += 1
         
+        elif(src[ptr] == '[') :
+            token = Token(src[ptr], TokenType.OpenBracket)
+            tokens.append(token)
+            ptr += 1
+
+        elif(src[ptr] == ']') :
+            token = Token(src[ptr], TokenType.CloseBracket)
+            tokens.append(token)
+            ptr += 1
+        
         elif(src[ptr] == ':') :
             token = Token(src[ptr], TokenType.Colon)
             tokens.append(token)
             ptr += 1
         
+        elif(src[ptr] == ';') :
+            token = Token(src[ptr], TokenType.SemiColon)
+            tokens.append(token)
+            ptr += 1
+
         elif(src[ptr] == ',') :
             token = Token(src[ptr], TokenType.Comma)
+            tokens.append(token)
+            ptr += 1
+
+        elif(src[ptr] == '.') :
+            token = Token(src[ptr], TokenType.Dot)
             tokens.append(token)
             ptr += 1
         
@@ -86,10 +111,6 @@ def tokenize(source) -> List[Token] :
             tokens.append(token)
             ptr += 1
 
-        elif(src[ptr] == ';') :
-            token = Token(src[ptr], TokenType.SemiColon)
-            tokens.append(token)
-            ptr += 1
 
 
         else :

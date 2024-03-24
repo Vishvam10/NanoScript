@@ -1,21 +1,37 @@
-import inspect
 from typing import List
 
-from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, VariableDecl, AssignmentExpr, PropertyLiteral, ObjectLiteral
+from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, VariableDecl, AssignmentExpr, PropertyLiteral, ObjectLiteral, CallExpr, MemberExpr
 from .lexer import TokenType, Token, tokenize
 
 '''
     order of precedence : 
+
     lower in the tree or the call stack has the highest precedence
 
+    |    Stmt                          (lowest)
+    |    Expr | VariableDecl
     |    AssignmentExpr
+    |    ObjectExpr
     |    AdditiveExpr
     |    MultiplicativeExpr
-    v    PrimaryExpr (highest)
+    |    CallExpr
+    |    MemberExpr
+    v    PrimaryExpr                    (highest)
 
     more precedence = further down the tree
-    so, additive calls multiplicative. multiplicative calls primary
-        
+
+    so, additive calls multiplicative. multiplicative calls primary,
+    assignment calls object expression, and so on
+
+    It always passes through the stack. Technically speaking, this 
+    would be the grammar of this language at this point :
+
+        Stmt                := Expr | VariableDecl
+        Expr                := AssignmentExpr
+        AssignmentExpr      := AssignmentExpr | ObjectExpr
+        ObjectExpr          := Expr | AdditiveExpr
+        AdditiveExpr        := MultiplicativeExpr
+        MultiplicativeExpr  := PrimaryExpr
 '''
 
 class Parser():
@@ -192,7 +208,6 @@ class Parser():
             properties=properties
         )
 
-
     def _parse_additive_expr(self) -> Expr:
         # left hand precedence : parse the left expr first
         left = self._parse_multiplicative_expr()
@@ -212,11 +227,11 @@ class Parser():
 
     def _parse_multiplicative_expr(self) -> Expr:
 
-        left = self._parse_primary_expr()
+        left = self._parse_call_member_expr()
 
         while (self._at().value == '/' or self._at().value == '*' or self._at() == '%'):
             operator = self._eat().value
-            right = self._parse_primary_expr()
+            right = self._parse_call_member_expr()
 
             # bubbling it up instead
             left = BinaryExpr(
@@ -226,6 +241,113 @@ class Parser():
             )
 
         return left
+
+    def _parse_call_member_expr(self) -> Expr :
+        
+        # foo.x() : we want to get rid of foo and x to call it
+        member = self._parse_member_expr()
+
+        if(self._at().type == TokenType.OpenParam) :
+            return self._parse_call_expr(member)
+        
+        return member
+
+    def _parse_call_expr(self, caller : Expr) -> Expr :
+        
+        args = self._parse_args()
+
+        # this takes care of foo.x() or x()
+        call_expr = CallExpr(
+            args=args,
+            caller=caller
+        )
+
+        # this allows us do function chaining 
+        # something like this : foo.x()() or x()()
+        if(self._at().type == TokenType.OpenParam) :
+            call_expr = self._parse_call_expr(call_expr)
+
+        print('[call expr] : HERE : ', call_expr)
+        return call_expr
+
+    def _parse_args(self) -> List[Expr] :
+
+        # we want to parse things like : add(x + 5, y - 2)
+        # by args we mean these not the parameters in 
+        # function declaration like : fn add(x, y)
+
+        self._expect(
+            TokenType.OpenParam,
+            'Expected open parenthesis'
+        )
+
+        token_type = self._at().type
+        args = []
+        
+        if(token_type != TokenType.CloseParam) :
+            args = self._parse_args_list()
+
+        self._expect(
+            TokenType.CloseParam,
+            'Expect closing parenthesis inside arguments list'
+        )
+        
+        return args
+
+    def _parse_args_list(self) -> List[Expr] :
+        
+        # we do this so we could use a while loop and not 
+        # something like a do while loop. We parse assignment expr
+        # to handle something like this : foo(x = 5, v = "bar")
+        args = [self._parse_assignment_expr()]
+
+        while(self._at().type == TokenType.Comma and self._eat()) :
+            arg = self._parse_assignment_expr()
+            args.append(arg)
+
+        return args
+
+    def _parse_member_expr(self) -> Expr :
+        
+        obj = self._parse_primary_expr()
+        computed = False
+        property : Expr = Expr(kind=Expr)
+
+        while(
+            (self._at().type == TokenType.Dot) or 
+            (self._at().type == TokenType.OpenBracket)    
+        ) :
+            operator = self._eat()
+
+            # handling non-computed values : foo.bar
+            if(operator.type == TokenType.Dot) :
+                computed = False
+                
+                # to get identifier
+                property = self._parse_primary_expr()
+
+                if(isinstance(property.kind, Identifier)) :
+                    print('\n[PARSER ERROR] : Cannot use dot operator without RHS being an identifier')
+            
+            else :
+                computed = True
+
+                # this allows computed values : foo[computedValue]
+                property = self._parse_expr()
+                
+                self._expect(
+                    TokenType.CloseBracket, 
+                    'Missing closing bracket in computed value'
+                )
+
+                
+            obj = MemberExpr(
+                object=obj,
+                property=property, 
+                computed=computed
+            )
+
+        return obj
 
     def _parse_primary_expr(self) -> Expr:
 

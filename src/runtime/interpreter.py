@@ -51,9 +51,12 @@ class Interpreter() :
         res = ObjectVal({})
 
         for prop in obj.properties :
+
+            # to handle { foo } which is the same as { foo : foo }
             value = self.evaluate(prop.value) if (prop.value) else self.env.lookup_var(prop.key)
 
             res.properties[prop.key] = value
+
         return res
 
     def _evaluate_variable_decl(self, decl: VariableDecl) -> RuntimeVal:
@@ -68,7 +71,7 @@ class Interpreter() :
     def _evaluate_assignment(self, node : AssignmentExpr) :
 
         if(node.assignee.kind != NodeType.Identifier) :
-            print(f'\n[INTERPRETER ERROR] : Invalid LHS inside assignmenr expr : {node.assignee.to_dict()}')
+            print(f'\n[INTERPRETER ERROR] : Invalid LHS inside assignmenr expr : \n{node.assignee.to_dict()}')
             exit(0)
         
         var_name = cast(Identifier, node.assignee).symbol
@@ -88,7 +91,7 @@ class Interpreter() :
     def evaluate(self, ast_node: Stmt) -> RuntimeVal:
 
         if (ast_node == None):
-            print('\n[INTERPRETER ERROR] : AST node is None : ', ast_node)
+            print('f\n[INTERPRETER ERROR] : \AST node is None : {ast_node}')
             exit(0)
 
         if (ast_node.kind == NodeType.NumericalLiteral):
@@ -113,7 +116,7 @@ class Interpreter() :
             return self._evaluate_program(ast_node)
 
         else:
-            print('\n[INTERPRETER ERROR] :  This AST node has not been yet been setup for interpretation : ', ast_node.to_dict())
+            print(f'\n[INTERPRETER ERROR] :  This AST node has not been yet been setup for interpretation : \n {ast_node.to_dict()}')
             exit(0)
 
         

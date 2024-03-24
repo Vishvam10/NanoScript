@@ -12,6 +12,8 @@ class NodeType(Enum):
     # Expressions
     AssignmentExpr = "AssignmentExpr"
     BinaryExpr = "BinaryExpr"
+    MemberExpr = "MemberExpr"
+    CallExpr = "CallExpr"
 
     # Literals
     Identifier = "Identifier"
@@ -88,6 +90,30 @@ class Identifier(Expr):
         return {'kind': self.kind.value, 'symbol': self.symbol}
 
 
+class CallExpr(Expr):
+    def __init__(self, args : List[Expr], caller : Expr):
+        super().__init__(NodeType.CallExpr)
+        self.args = args
+        
+        # not Identifier because of cases like this : foo.bar() 
+        self.caller = caller
+
+    def to_dict(self):
+        return {'kind': self.kind.value, 'args' : self.args, 'caller' : self.caller}
+
+class MemberExpr(Expr):
+    def __init__(self, object: Expr, property : Expr, computed : bool):
+        super().__init__(NodeType.MemberExpr)
+        self.object = object
+        self.property = property
+
+        # for cases like foo["bar"]() or foo[baz()]()
+        self.computed = computed
+
+    def to_dict(self):
+        return {'kind': self.kind.value, 'object' : self.object, 'property' : self.property, 'computed' : self.computed}
+
+
 # ------------------------------------------------------------------------------
 # Literals 
 # ------------------------------------------------------------------------------
@@ -117,3 +143,9 @@ class ObjectLiteral(Expr):
 
     def to_dict(self):
         return {'kind': self.kind.value, 'properties': self.properties}
+
+
+# ------------------------------------------------------------------------------
+# Literals 
+# ------------------------------------------------------------------------------
+
