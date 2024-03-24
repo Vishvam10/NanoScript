@@ -1,6 +1,6 @@
 import json
 from frontend.parser import Parser, Program
-from runtime.values import RuntimeVal
+from runtime.values.base import RuntimeVal
 from runtime.interpreter import Interpreter
 from runtime.environment import create_global_env
 
@@ -66,12 +66,18 @@ def run() :
     parser = Parser()
 
     program : Program = parser.generate_ast(inp)
-    print_tree(program.body)
-    
+    for stmt in program.body :
+        print()
+        print(stmt)
+        print()
+
     interpreter = Interpreter(env)
     
+    print('\nRESULT\n')
     result : RuntimeVal = interpreter.evaluate(program)
+    print()
     print(result.__dict__)
+    print()
 
 
 

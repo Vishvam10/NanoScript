@@ -1,8 +1,10 @@
 from typing import cast
 
-from .values import *
 from frontend.ast import *
-from runtime.environment import Environment
+from .values.base import *
+from .values.derived import ObjectVal, NumberVal, NativeFunctionVal
+from .values.make import make_null, make_number
+from .environment import Environment
 
 class Interpreter() :
 
@@ -59,6 +61,28 @@ class Interpreter() :
 
         return res
 
+    def _evaluate_call_expr(self, expr : CallExpr) -> RuntimeVal :
+        
+        args : List[RuntimeVal] = []
+
+        for arg in expr.args :
+            value = self.evaluate(arg)
+            args.append(value)
+
+        print(f'\n[call expr args] : {args}\n')
+
+        func = self.evaluate(expr.caller)
+
+        if(not isinstance(func, NativeFunctionVal)) :
+            print(f'\n[INTERPRETER ERROR] : Cannot call value that is not a function : {func}')
+
+        print(f'\n[call expr args] : {args}\n')
+        result = func.callback(args, self.env)
+
+        print(f'\n[call expr result] : {result}\n')
+
+        return result
+
     def _evaluate_variable_decl(self, decl: VariableDecl) -> RuntimeVal:
 
         val = make_null()
@@ -108,6 +132,9 @@ class Interpreter() :
         
         elif (ast_node.kind == NodeType.ObjectLiteral):
             return self._evaluate_object_expr(ast_node)
+        
+        elif (ast_node.kind == NodeType.CallExpr):
+            return self._evaluate_call_expr(ast_node)
 
         elif (ast_node.kind == NodeType.VariableDecl):
             return self._evaluate_variable_decl(ast_node)

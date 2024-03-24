@@ -1,12 +1,2 @@
 let foo = 50 / 2;
-
-const obj = {
-    x : 10,
-    y : 20,
-    foo : foo,
-    nested : {
-        bar : 34
-    }
-};
-
-foo = obj.foo(bar(x, y))
+print(foo, 45)

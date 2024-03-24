@@ -1,7 +1,7 @@
 from typing import Dict, Set, Optional
-from runtime.values import RuntimeVal
+from runtime.values.base import RuntimeVal
 
-from .values import make_bool, make_null
+from .values.make import make_bool, make_null, make_number, make_native_fn
 
 # This is the 'scope'. 
 
@@ -55,8 +55,6 @@ class Environment() :
 
         return self.parent.resolve(var_name)
 
-
-
 def create_global_env() :
 
     env = Environment()
@@ -65,5 +63,15 @@ def create_global_env() :
     env.decl_var("true", make_bool(True), True)
     env.decl_var("false", make_bool (False), True)
     env.decl_var("null", make_null(), True)
+
+    # define a native methods :
+    
+    def print_callback(args, env) :
+        print('\n********** CUSTOM PRINT CALLBACK **********\n')
+        print(*args)
+        print('\n*******************************************\n')
+        return make_number(1000000)
+    
+    env.decl_var('print', make_native_fn(print_callback), True)
     
     return env
