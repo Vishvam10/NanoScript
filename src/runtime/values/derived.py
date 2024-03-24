@@ -1,20 +1,5 @@
-# contains values that are need during run time
-from typing import Dict
-from enum import Enum
-from abc import ABC
-
-class ValueType(Enum):
-    Null = "null"
-    Number = "number"
-    Boolean = "boolean"
-    Object = "object"
-
-class RuntimeVal(ABC):
-    def __init__(self, type: ValueType):
-        self.type = type
-
-    def to_dict(self):
-        return {'type': self.type}
+from typing import Dict, Callable
+from .base import RuntimeVal, ValueType
 
 class NullVal(RuntimeVal) :
     def __init__(self):
@@ -24,7 +9,7 @@ class NullVal(RuntimeVal) :
     def to_dict(self):
         return {'type': self.type}
 
-class Boolean(RuntimeVal) :
+class BooleanVal(RuntimeVal) :
     def __init__(self, value : bool):
         super().__init__(ValueType.Boolean)
         self.value = value
@@ -48,20 +33,18 @@ class ObjectVal(RuntimeVal) :
 
     def to_dict(self):
         return {'type': self.type, 'value' : self.value }
+
+class NativeFunctionVal(RuntimeVal) :
+
+    # TODO : make callback of type : 
+    # Callabale[[List[RuntimeVal, Environment]], None]
+    # current design prevents importing Environment due 
+    # to circular nature. Need some refactoring
+    def __init__(self, callback : Callable[..., None]):
+        super().__init__(ValueType.NativeFunction)
+        self.callback = callback
+
+    def to_dict(self):
+        return {'type': self.type, 'callback' : self.callback }
     
-      
-# sorta like C macros
-
-def make_number(n : float = 0) -> NumberVal :
-    return NumberVal(
-        value=n
-    )
-
-def make_null() -> NullVal :
-    return NullVal()
-
-def make_bool(val : bool = True) :
-    return Boolean(
-        value=val
-    )
 
