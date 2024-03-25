@@ -1,20 +1,32 @@
+import json
 from typing import Dict, Set, Optional
-from runtime.values.base import RuntimeVal
+from runtime.values.base import RuntimeVal, ValueType
 
 from .values.make import make_bool, make_null, make_number, make_native_fn
+from  utils.print import print_tree
 
 # This is the 'scope'. 
 
 class Environment() :
 
+    level = 0
+
     def __init__(self, parent : Optional['Environment'] = None) -> None:
         self.global_scope : bool = (parent == None)
-        self.parent : Environment = None
+        self.parent : Environment = parent
         self.variables : Dict[
             str, RuntimeVal
         ] = {}
         self.constants : Set[str] = set()
-    
+        
+        
+        self.level = Environment.level
+        Environment.level += 1
+
+        self.name = f'Env := {self.level}' if self.level != 0 else 'global'
+        
+
+
     def decl_var(self, var_name : str, value : RuntimeVal, constant : bool) -> RuntimeVal :
 
         if(var_name in self.variables) :
@@ -41,6 +53,18 @@ class Environment() :
         return value
 
     def lookup_var(self, var_name : str) -> RuntimeVal :
+
+        if('.' in var_name) :
+            vn = var_name.split('.')[0]
+            env : Environment = self.resolve(vn)
+            value : RuntimeVal = env.lookup_var(vn)
+
+            for prop in var_name.split('.')[1:] :
+                if(value.type == ValueType.Object) :
+                    value = value.properties[prop]
+
+            return value
+                
         
         env : Environment = self.resolve(var_name)
         return env.variables[var_name]
@@ -68,9 +92,12 @@ def create_global_env() :
     
     def print_callback(args, env) :
         print('\n********** CUSTOM PRINT CALLBACK **********\n')
-        print(*args)
+        res = [arg.to_dict() for arg in args]
+        for r in res :
+            print()
+            print(r)
+            print()
         print('\n*******************************************\n')
-        return make_number(1000000)
     
     env.decl_var('print', make_native_fn(print_callback), True)
     

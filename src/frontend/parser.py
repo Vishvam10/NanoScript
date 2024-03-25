@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, cast
 
-from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, VariableDecl, AssignmentExpr, PropertyLiteral, ObjectLiteral, CallExpr, MemberExpr
+from .ast import Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, VariableDecl, AssignmentExpr, PropertyLiteral, ObjectLiteral, CallExpr, MemberExpr, FunctionDecl
+
 from .lexer import TokenType, Token, tokenize
 
 '''
@@ -26,7 +27,7 @@ from .lexer import TokenType, Token, tokenize
     It always passes through the stack. Technically speaking, this 
     would be the grammar of this language at this point :
 
-        Stmt                := Expr | VariableDecl
+        Stmt                := Expr | VariableDecl | FunctionDecl
         Expr                := AssignmentExpr
         AssignmentExpr      := AssignmentExpr | ObjectExpr
         ObjectExpr          := Expr | AdditiveExpr
@@ -66,6 +67,8 @@ class Parser():
 
         if(token_type == TokenType.Let or token_type == TokenType.Const) :
             return self._parse_variable_decl()
+        elif(token_type == TokenType.Fn) :
+            return self._parse_function_decl()
         else :
             return self._parse_expr()
 
@@ -108,6 +111,57 @@ class Parser():
             value=value,
             constant=is_constant
         )
+
+    def _parse_function_decl(self) -> Stmt :
+
+        # eat the fn keyword
+        self._eat()
+
+        name = self._expect(
+            TokenType.Identifier, 
+            'Expected function name following fn keyword'
+        ).value
+
+        # this also accepts expr but that should not 
+        # be allowed in fn decl. so, fn add(x, y) 
+        # is allowed but fn add(x + 5, y - 3) is not
+        # so we manually check it if it's a string (kinda hacky)
+        args = self._parse_args()
+        params : List[str] = []
+
+        for arg in args :
+            # TOOD : use isinstance() here
+            if(isinstance(arg.kind, Identifier)) :
+                print(f'\n[PARSER ERROR] : Inside function decl parameters are expected to be of type string : {arg.kind}')
+                exit(0)
+        
+            params.append(cast(Identifier, arg).symbol)
+
+        self._expect(
+            TokenType.OpenBrace, 
+            'Expected function body following decl'
+        )
+
+        body : List[Stmt] = []
+
+        while(
+            (self._at().type != TokenType.EOF) and 
+            (self._at().type != TokenType.CloseBrace)
+        ) :
+            stmt = self._parse_stmt()
+            body.append(stmt)
+
+        self._expect(
+            TokenType.CloseBrace, 
+            'Closing brace expected inside function decl'
+        )
+
+        return FunctionDecl(
+            name=name, 
+            parameters=params, 
+            body=body
+        )
+
 
     def _parse_assignment_expr(self) : 
         assignee : Expr = self._parse_object_expr()

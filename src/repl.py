@@ -48,7 +48,6 @@ def run() :
 
     interpreter = Interpreter(env)
     
-    print('\nRESULT\n')
     result : RuntimeVal = interpreter.evaluate(program)
 
     try :

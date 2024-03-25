@@ -9,10 +9,11 @@ class ValueType(Enum):
     Boolean = "boolean"
     Object = "object"
     NativeFunction = "native-function"
+    Function = "function"
 
 class RuntimeVal(ABC):
     def __init__(self, type: ValueType):
         self.type = type
 
     def to_dict(self):
-        return {'type': self.type}
+        return {'type': self.type.value}

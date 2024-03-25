@@ -1,2 +1,50 @@
-let foo = 50 / 2;
-print(foo, 45)
+fn calc (x, y) {
+
+    let res;
+    let a;
+    let b;
+    let c;
+    let d;
+
+    fn add(x, y) {
+        res = x + y
+        res
+    }
+
+    fn sub(x, y) {
+        res = x - y
+        res
+    }
+
+
+    fn mult(x, y) {
+        res = x * y
+        res
+    }
+
+
+    fn div(x, y) {
+        res = x / y
+        res
+    }
+
+    res = {
+        sum : add(x, y), 
+        diff : sub(x, y),
+        prod : mult(x, y),
+        quo : div(x, y),
+        transformed : {
+            a : mult(add(x, y), 2),
+            b : {
+                c : sub(add(x, 10), 1) + div(mult(x, y), 12)
+            }
+        }
+    }
+
+    res
+
+}
+
+
+let res = calc(10, 4);
+print(res.transformed.b.c)

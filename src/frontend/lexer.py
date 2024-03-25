@@ -29,14 +29,17 @@ class TokenType(Enum) :
 
     BinaryOperator = auto()
     
+    # Keywords
     Let = auto()
     Const = auto()
+    Fn = auto()
 
     EOF = auto()
 
 KEYWORDS : Dict[str, TokenType] = {
     "let" : TokenType.Let,
-    "const" : TokenType.Const
+    "const" : TokenType.Const,
+    "fn" : TokenType.Fn
 }
 
 class Token() :
