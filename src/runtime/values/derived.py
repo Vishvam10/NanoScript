@@ -32,7 +32,7 @@ class ObjectVal(RuntimeVal) :
         self.properties = properties
 
     def to_dict(self):
-        return {'type': self.type, 'value' : self.value }
+        return {'type': self.type, 'properties' : self.properties }
 
 class NativeFunctionVal(RuntimeVal) :
 
@@ -46,5 +46,3 @@ class NativeFunctionVal(RuntimeVal) :
 
     def to_dict(self):
         return {'type': self.type, 'callback' : self.callback }
-    
-

@@ -8,6 +8,7 @@ class NodeType(Enum):
     Stmt = "Statement"
     Program = "Program"
     VariableDecl = "VariableDecl"
+    FunctionDecl = "FunctionDecl"
 
     # Expressions
     AssignmentExpr = "AssignmentExpr"
@@ -19,7 +20,7 @@ class NodeType(Enum):
     Identifier = "Identifier"
     NumericalLiteral = "NumericLiteral"
     PropertyLiteral = "PropertyLiteral"
-    ObjectLiteral = "Object" 
+    ObjectLiteral = "ObjectLiteral" 
 
 
 # ------------------------------------------------------------------------------
@@ -39,7 +40,8 @@ class Program(Stmt):
         self.body: List[Stmt] = []
 
     def to_dict(self):
-        return {'kind': self.kind.value, 'body': [stmt.to_dict() for stmt in self.body]}
+        body = [stmt.to_dict() for stmt in self.body]
+        return {'kind': self.kind.value, 'body': body}
 
 class VariableDecl(Stmt):
     def __init__(self, identifier: str, value: 'Expr', constant: bool) -> None:
@@ -49,7 +51,20 @@ class VariableDecl(Stmt):
         self.constant = constant
 
     def to_dict(self):
-        return {'kind': self.kind.value, 'indentifier': self.identifier, 'value': self.value, 'constant': self.constant}
+        # print('REACHED : ', self.value)
+        value = self.value.to_dict() if self.value is not None else None
+        return {'kind': self.kind.value, 'identifier': self.identifier, 'value': value, 'constant': self.constant}
+
+class FunctionDecl(Stmt):
+    def __init__(self, name : str, parameters: List[str], body : List[Stmt]) -> None:
+        super().__init__(NodeType.FunctionDecl)
+        self.name = name
+        self.parameters = parameters
+        self.body = body
+
+    def to_dict(self):
+        body = [stmt.to_dict() for stmt in self.body]
+        return {'kind': self.kind.value, 'name': self.name, 'parameters': self.parameters, 'body': body}
 
 # ------------------------------------------------------------------------------
 # Expressions 
@@ -77,9 +92,9 @@ class AssignmentExpr(Expr):
         self.assignee = assignee
         self.value = value
 
-
     def to_dict(self):
-        return {'kind': self.kind.value, 'assignee': self.assignee.to_dict(), 'value': self.value.to_dict()}
+        value = self.value.to_dict() if self.value is not None else None
+        return {'kind': self.kind.value, 'assignee': self.assignee.to_dict(), 'value': value}
 
 class Identifier(Expr):
     def __init__(self, symbol: str):
@@ -88,7 +103,6 @@ class Identifier(Expr):
 
     def to_dict(self):
         return {'kind': self.kind.value, 'symbol': self.symbol}
-
 
 class CallExpr(Expr):
     def __init__(self, args : List[Expr], caller : Expr):
@@ -99,7 +113,8 @@ class CallExpr(Expr):
         self.caller = caller
 
     def to_dict(self):
-        return {'kind': self.kind.value, 'args' : self.args, 'caller' : self.caller}
+        args = [arg.to_dict() for arg in self.args]
+        return {'kind': self.kind.value, 'args' : args, 'caller' : self.caller.to_dict()}
 
 class MemberExpr(Expr):
     def __init__(self, object: Expr, property : Expr, computed : bool):
@@ -111,7 +126,7 @@ class MemberExpr(Expr):
         self.computed = computed
 
     def to_dict(self):
-        return {'kind': self.kind.value, 'object' : self.object, 'property' : self.property, 'computed' : self.computed}
+        return {'kind': self.kind.value, 'object' : self.object.to_dict(), 'property' : self.property.to_dict(), 'computed' : self.computed}
 
 
 # ------------------------------------------------------------------------------
@@ -134,7 +149,8 @@ class PropertyLiteral(Expr):
         self.value = value
 
     def to_dict(self):
-        return {'kind': self.kind.value, 'value': self.value}
+        value = self.value.to_dict() if self.value is not None else None
+        return {'kind': self.kind.value, 'value': self.value.to_dict()}
 
 class ObjectLiteral(Expr):
     def __init__(self, properties: List[PropertyLiteral]):
@@ -142,10 +158,5 @@ class ObjectLiteral(Expr):
         self.properties = properties
 
     def to_dict(self):
-        return {'kind': self.kind.value, 'properties': self.properties}
-
-
-# ------------------------------------------------------------------------------
-# Literals 
-# ------------------------------------------------------------------------------
-
+        properties = [prop.to_dict() for prop in self.properties]
+        return {'kind': self.kind.value, 'properties': properties}

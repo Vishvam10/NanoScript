@@ -4,29 +4,7 @@ from runtime.values.base import RuntimeVal
 from runtime.interpreter import Interpreter
 from runtime.environment import create_global_env
 
-def print_tree(node, indent=0):
-    if isinstance(node, dict):
-        for key, value in node.items():
-            if isinstance(value, (dict, list)):
-                print("  " * indent + f"{key}:")
-                print_tree(value, indent + 1)
-            else:
-                try:
-                    serialized_value = json.dumps(value)
-                    print("  " * indent + f"{key}: {serialized_value}")
-                except TypeError:
-                    print("  " * indent + f"{key}: [Non-serializable]")
-    elif isinstance(node, list):
-        for item in node:
-            if isinstance(item, (dict, list)):
-                print_tree(item, indent)
-            else:
-                try:
-                    serialized_item = json.dumps(item)
-                    print("  " * indent + f"- {serialized_item}")
-                except TypeError:
-                    print("  " * indent + "- [Non-serializable]")
-
+from utils.print import print_tree
 
 def repl() :
 
@@ -66,19 +44,19 @@ def run() :
     parser = Parser()
 
     program : Program = parser.generate_ast(inp)
-    for stmt in program.body :
-        print()
-        print(stmt)
-        print()
+    print(json.dumps(program.to_dict(), indent=2))
 
     interpreter = Interpreter(env)
     
     print('\nRESULT\n')
     result : RuntimeVal = interpreter.evaluate(program)
-    print()
-    print(result.__dict__)
-    print()
 
+    try :
+        print()
+        print(result.__dict__)
+        print()
+    except :
+        pass
 
 
 if __name__ == '__main__' :
