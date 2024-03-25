@@ -140,12 +140,16 @@ libraries like `ply` or `pybison`.
     ```
     
 
+
 ## Some Notes On Grammar
 
-    ```
-    Order of precedence : 
 
-        lower in the tree or the call stack has the highest precedence
+
+-  **Order of precedence :** 
+
+    ```
+    
+    lower in the tree or the call stack has the highest precedence
 
         |    Stmt                          (lowest)
         |    Expr | VariableDecl
@@ -157,26 +161,24 @@ libraries like `ply` or `pybison`.
         |    MemberExpr
         v    PrimaryExpr                    (highest)
 
-        more precedence = further down the tree
+    more precedence = further down the tree
 
-        so, additive calls multiplicative. multiplicative calls primary.
-        similarly, assignment calls object expression, and so on
+    so, additive calls multiplicative. multiplicative calls primary. similarly, assignment calls object expression, and so on
 
-        At any level of the stack described above, the expr that the parser 
-        currently points at will always :
-            
-            - return something or
-            - call itself or
-            - call an expr that has a lower precedence
-            - call an expr that has a one level higher precedence
+    At any level of the stack described above, the expr that the parser 
+    currently points at will always :
+        
+        - return something or
+        - call itself or
+        - call an expr that has a lower precedence
+        - call an expr that has a one level higher precedence
 
-        At no point, an expr calls another expr that has more than one level of 
-        precedence difference. It always passes through the above order. 
-        So, for example :
+    At no point, an expr calls another expr that has more than one level of precedence difference. It always passes through the above order. 
+    So, for example :
 
-            VariableDecl can not directly call PrimaryExpr  or say
-            AdditiveExpr can not directly call MemberExpr
-    
+        VariableDecl can not directly call PrimaryExpr  or say
+        AdditiveExpr can not directly call MemberExpr
+
 
     Technically speaking, this would be the grammar of this language at this point :
 
@@ -189,18 +191,15 @@ libraries like `ply` or `pybison`.
         
     ```
 
-**Note :** 
+- **Note :** 
 
-    - The grammar created here is based on the parser implementation.
-    - Ideally, it would the other way around - we write the rules and code a 'meta program' to auto-generate the parser file. For the time being, this is what we will be working with the former.
-    - This is bound to change in the future.
-
-
-
-
+        - The grammar created here is based on the parser implementation.
+        - Ideally, it would the other way around - we write the rules and code a 'meta program' to auto-generate the parser file. For the time being, this is what we will be working with the former.
+        - This is bound to change in the future.
 
 
 ## Getting Started 
+
 
 To dive into Nanoscript, simply clone this repository and start experimenting with the language. 
 
@@ -215,6 +214,7 @@ python repl.py
 ```
 
 ## License 
+
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
