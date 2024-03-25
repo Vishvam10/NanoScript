@@ -1,0 +1,14 @@
+fn calc(x, y) {
+
+    fn sample(a, b) {
+        const VAL = 12;
+        const res = a + b;
+        res
+    }
+
+    print(VAL)
+
+}
+
+calc(1, 1)
+
